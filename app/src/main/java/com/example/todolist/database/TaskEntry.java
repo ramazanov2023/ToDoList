@@ -1,6 +1,7 @@
 package com.example.todolist.database;
 
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -16,6 +17,7 @@ public class TaskEntry {
     private int id;
     private String description;
     private int priority;
+    @ColumnInfo(name = "update_at")
     private Date updatedAt;
 
     // TODO (4) Use the Ignore annotation so Room knows that it has to use the other constructor instead
