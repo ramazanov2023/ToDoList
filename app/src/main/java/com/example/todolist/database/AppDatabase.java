@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 @Database(entities = {TaskEntry.class},version = 1,exportSchema = false)
-@TypeConverters()
+@TypeConverters(DataConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 
     private final static String LOG = AppDatabase.class.getSimpleName();
@@ -20,7 +20,10 @@ public abstract class AppDatabase extends RoomDatabase {
     public static AppDatabase getInstance(Context context){
         if(instance==null){
             synchronized (LOCK){
-                instance = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, AppDatabase.DATABASE_NAME).build();
+                instance = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, AppDatabase.DATABASE_NAME)
+                        //Временное включение разрешения на запрос базы данных из основного потока
+                        .allowMainThreadQueries()
+                        .build();
                 Log.e(LOG,"GRANTED");
             }
         }

@@ -15,8 +15,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.todolist.database.AppDatabase;
 import com.example.todolist.database.TaskEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.Date;
 
 public class AddTaskActivity extends AppCompatActivity {
 
@@ -38,12 +41,15 @@ public class AddTaskActivity extends AppCompatActivity {
     Button mButton;
 
     private int mTaskId = DEFAULT_TASK_ID;
+    AppDatabase mDb;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
 
         initViews();
+
+        mDb = AppDatabase.getInstance(this);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_TASK_ID)) {
             mTaskId = savedInstanceState.getInt(INSTANCE_TASK_ID, DEFAULT_TASK_ID);
@@ -95,6 +101,12 @@ public class AddTaskActivity extends AppCompatActivity {
      */
     public void onSaveButtonClicked() {
         // Not yet implemented
+        String description = mEditText.getText().toString().trim();
+        int priority = getPriorityFromViews();
+        Date date = new Date();
+        TaskEntry taskEntry = new TaskEntry(description,priority,date);
+        mDb.taskDao().insertTask(taskEntry);
+        finish();
     }
 
     /**
