@@ -13,7 +13,10 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.todolist.database.AppDatabase;
+import com.example.todolist.database.TaskEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemClickListener {
 
@@ -59,8 +62,17 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
 
             // Called when a user swipes left or right on a ViewHolder
             @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+            public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 // Here is where you'll implement swipe to delete
+                int position = viewHolder.getAdapterPosition();
+                TaskEntry taskEntry = mAdapter.getTasks().get(position);
+                AppExecutors.getInstance().discIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.taskDao().deleteTask(taskEntry);
+                        getTasks();
+                    }
+                });
             }
         }).attachToRecyclerView(mRecyclerView);
 
@@ -89,6 +101,21 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
     @Override
     protected void onResume() {
         super.onResume();
-        mAdapter.setTasks(mDb.taskDao().loadAllTasks());
+        getTasks();
+    }
+
+    public void getTasks(){
+        AppExecutors.getInstance().discIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<TaskEntry> tasks = mDb.taskDao().loadAllTasks();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.setTasks(tasks);
+                    }
+                });
+            }
+        });
     }
 }
