@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -61,16 +63,12 @@ public class AddTaskActivity extends AppCompatActivity {
             if (mTaskId == DEFAULT_TASK_ID) {
                 // populate the UI
                 mTaskId = getIntent().getIntExtra(EXTRA_TASK_ID,DEFAULT_TASK_ID);
-                AppExecutors.getInstance().discIO().execute(new Runnable() {
+                final LiveData<TaskEntry> task = mDb.taskDao().loadTaskById(mTaskId);
+                task.observe(this, new Observer<TaskEntry>() {
                     @Override
-                    public void run() {
-                       final TaskEntry taskEntry = mDb.taskDao().loadTaskById(mTaskId);
-                       runOnUiThread(new Runnable() {
-                           @Override
-                           public void run() {
-                               populateUI(taskEntry);
-                           }
-                       });
+                    public void onChanged(TaskEntry taskEntry) {
+                        task.removeObserver(this);
+                        populateUI(taskEntry);
                     }
                 });
             }
