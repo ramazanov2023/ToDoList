@@ -11,7 +11,6 @@ import java.util.List;
 
 @Dao
 public interface TaskDao {
-
     @Query("SELECT * FROM task ORDER BY priority")
     List<TaskEntry> loadAllTasks();
 
@@ -23,4 +22,7 @@ public interface TaskDao {
 
     @Delete
     void deleteTask(TaskEntry taskEntry);
+
+    @Query("SELECT * FROM task WHERE id = :id")
+    TaskEntry loadTaskById(int id);
 }
