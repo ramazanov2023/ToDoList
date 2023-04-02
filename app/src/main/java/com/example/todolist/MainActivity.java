@@ -3,6 +3,8 @@ package com.example.todolist;
 import static com.google.android.material.divider.MaterialDividerItemDecoration.VERTICAL;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -70,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                     @Override
                     public void run() {
                         mDb.taskDao().deleteTask(taskEntry);
-                        getTasks();
                     }
                 });
             }
@@ -91,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                 startActivity(addTaskIntent);
             }
         });
+
+        getTasks();
     }
 
     @Override
@@ -101,24 +104,17 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
         startActivity(intent);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getTasks();
-    }
 
     public void getTasks(){
-        AppExecutors.getInstance().discIO().execute(new Runnable() {
+        final LiveData<List<TaskEntry>> tasks = mDb.taskDao().loadAllTasks();
+        tasks.observe(this, new Observer<List<TaskEntry>>() {
             @Override
-            public void run() {
-                final List<TaskEntry> tasks = mDb.taskDao().loadAllTasks();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.setTasks(tasks);
-                    }
-                });
+            public void onChanged(List<TaskEntry> taskEntries) {
+                mAdapter.setTasks(taskEntries);
             }
         });
+
     }
+
+
 }
